@@ -33,4 +33,4 @@ this gives two ouptus
 1)what should be the threshold cutoff if we want to identify similar images with 80% accuracy
 2)What should be cutoff threshold if we want to identify no similar images with 80% accuracy 
 
-Change percentage according to your needs
+Change percentage according to your needs.
