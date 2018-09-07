@@ -1,5 +1,12 @@
 Face Recognition in Tensorflow using prebuilt model from facenet
 
+Download the prebuilt model from the below link
+<a> https://drive.google.com/open?id=1EXPBSXwTaqrSC0OhUdXNmKSh9qJUQ55- </a>
+
+extract the zip file
+
+You will find the model file <b>20180402-114759.pb</b>
+
 Finding the threshold for similarity
 
 Create a folder Test_Images in the master folder
@@ -26,7 +33,7 @@ Step2:
 Create a folder named Face_distance_matrix in the master folder
 
 Step3:
-python src/compare.py Test_Images/*
+python src/compare.py path_to_20180402-114759.pb_file Test_Images/*
 
 Step4:
 python src/find_threshold.py 80 80
