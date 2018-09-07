@@ -4,7 +4,7 @@ Finding the threshold for similarity
 
 Create a folder Test_Images in the master folder
 Arrange your images in the following way
-
+<pre>
 Step1:
 Test_Images
       Mahesh Babu
@@ -21,6 +21,7 @@ Test_Images
           image3.jpg
 Names need not be the way mentioned can have any name
 
+
 Step2:
 Create a folder named Face_distance_matrix in the master folder
 
@@ -34,3 +35,5 @@ this gives two ouptus
 2)What should be cutoff threshold if we want to identify no similar images with 80% accuracy 
 
 Change percentage according to your needs.
+
+</pre>
