@@ -1,26 +1,6 @@
 """Performs face alignment and calculates L2 distance between the embeddings of images."""
 
-# MIT License
-# 
-# Copyright (c) 2016 David Sandberg
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+
 
 from __future__ import absolute_import
 from __future__ import division
@@ -35,10 +15,11 @@ import copy
 import argparse
 import facenet
 import align.detect_face
+import pickle
 
 def main(args):
 
-    images = load_and_align_data(args.image_files, args.image_size, args.margin, args.gpu_memory_fraction)
+    images,all_paths = load_and_align_data(args.image_files, args.image_size, args.margin, args.gpu_memory_fraction)
     with tf.Graph().as_default():
 
         with tf.Session() as sess:
@@ -55,7 +36,7 @@ def main(args):
             feed_dict = { images_placeholder: images, phase_train_placeholder:False }
             emb = sess.run(embeddings, feed_dict=feed_dict)
             
-            nrof_images = len(args.image_files)
+            nrof_images = len(all_paths)
 
             print('Images:')
             for i in range(nrof_images):
@@ -63,6 +44,7 @@ def main(args):
             print('')
             
             # Print distance matrix
+            res = np.zeros([nrof_images,nrof_images])
             print('Distance matrix')
             print('    ', end='')
             for i in range(nrof_images):
@@ -72,8 +54,14 @@ def main(args):
                 print('%1d  ' % i, end='')
                 for j in range(nrof_images):
                     dist = np.sqrt(np.sum(np.square(np.subtract(emb[i,:], emb[j,:]))))
+                    res[i][j] = dist
                     print('  %1.4f  ' % dist, end='')
                 print('')
+            print("Similarity and dis Similarity matrix",res)
+            print("Pickling the results")
+            pickle.dump(res,open( '../Face_distance_matrix/face_distance.pkl','wb' ))
+            pickle.dump(all_paths,open( '../Face_distance_matrix/image_paths.pkl','wb' ))
+
             
             
 def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
@@ -90,8 +78,16 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
             pnet, rnet, onet = align.detect_face.create_mtcnn(sess, None)
   
     tmp_image_paths=copy.copy(image_paths)
-    img_list = []
+    print("temp_image_paths",tmp_image_paths)
     for image in tmp_image_paths:
+        if os.path.isdir(image):
+            all_paths.extend([image+"/"+path for path in os.listdir(image)])
+        else:
+            all_paths.append(image)
+    print("All Paths",all_paths)
+
+    img_list = []
+    for image in all_paths:
         img = misc.imread(os.path.expanduser(image), mode='RGB')
         img_size = np.asarray(img.shape)[0:2]
         bounding_boxes, _ = align.detect_face.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
@@ -110,7 +106,7 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
         prewhitened = facenet.prewhiten(aligned)
         img_list.append(prewhitened)
     images = np.stack(img_list)
-    return images
+    return images,all_paths
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
