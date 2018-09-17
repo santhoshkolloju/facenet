@@ -43,4 +43,15 @@ this gives two ouptus
 
 Change percentage according to your needs.
 
+
+REST API:
+
+nohup python src/facesimilarity_rest.py 0.85 &
+runs the REST Server at port 1120
+
+Test using curl
+curl POST -F "base_image=@Mahesh1.jpeg" -F "image1=@Mahesh2.jpg" -F "new_image2=@pavan2.jpeg" http://hostipaddress:1120/scoreimages
+
+
+
 </pre>
